@@ -14,6 +14,7 @@ import NegotiationPanel from './pages/NegotiationPanel';
 import Contracts from './pages/Contracts';
 import ChatPage from './pages/ChatPage';
 import Notifications from './pages/Notifications';
+import EditProfile from './pages/EditProfile';
 import './index.css';
 
 function Spinner() {
@@ -72,6 +73,7 @@ export default function App() {
                             <Route path="contracts" element={<Contracts />} />
                             <Route path="chat/:sessionId" element={<ChatPage />} />
                             <Route path="notifications" element={<Notifications />} />
+                            <Route path="profile" element={<EditProfile />} />
                         </Route>
                         <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>

@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { getSocket } from "../services/socket";
 import {
-  LayoutDashboard, Sprout, FileText, Bell, LogOut, ChevronRight, ChevronLeft, Sun, Moon,
+  LayoutDashboard, Sprout, FileText, Bell, LogOut, ChevronRight, ChevronLeft, Sun, Moon, UserCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/requirements", icon: Sprout,          label: "Requirements" },
   { to: "/contracts",    icon: FileText,         label: "Contracts" },
   { to: "/notifications",icon: Bell,             label: "Notifications" },
+  { to: "/profile",      icon: UserCircle,       label: "Company Profile" },
 ];
 
 export default function Layout() {
@@ -51,7 +52,7 @@ export default function Layout() {
           {!collapsed && (
             <div className="flex items-center gap-2">
               <Sprout size={22} className="text-green-500" />
-              <span className="font-extrabold text-lg bg-gradient-to-r from-green-500 to-amber-500 bg-clip-text text-transparent">
+              <span className="font-extrabold text-lg bg-linear-to-r from-green-500 to-amber-500 bg-clip-text text-transparent">
                 AgriLink
               </span>
             </div>
@@ -107,7 +108,7 @@ export default function Layout() {
 
           {/* User + Logout */}
           <div className="flex items-center gap-2 px-1">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center text-white font-bold text-sm shrink-0">
+            <div className="w-8 h-8 rounded-full bg-linear-to-br from-green-500 to-emerald-700 flex items-center justify-center text-white font-bold text-sm shrink-0">
               {user?.name?.[0]?.toUpperCase()}
             </div>
             {!collapsed && (
