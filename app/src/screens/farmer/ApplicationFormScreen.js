@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo,useState ,useCallback} from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
@@ -6,6 +6,26 @@ import {
 import api from '../../services/api';
 
 const C = { bg: '#0f172a', card: '#1e293b', border: '#334155', text: '#f1f5f9', muted: '#94a3b8', primary: '#16a34a', accent: '#f59e0b', dim: '#64748b' };
+
+
+const InputField = memo(({ label, value, onChangeText, placeholder, suffix }) => (
+  <View style={s.formGroup}>
+    <Text style={s.label}>
+      {label}
+      {suffix ? <Text style={{ color: C.dim }}> ({suffix})</Text> : ''}
+    </Text>
+
+    <TextInput
+      style={s.input}
+      placeholder={placeholder}
+      placeholderTextColor={C.muted}
+      keyboardType="numeric"
+      value={value}
+      onChangeText={onChangeText}
+    />
+  </View>
+));
+
 
 export default function ApplicationFormScreen({ route, navigation }) {
   const { requirement } = route.params;
@@ -37,13 +57,6 @@ export default function ApplicationFormScreen({ route, navigation }) {
     }
   };
 
-  const InputField = ({ label, value, onChangeText, placeholder, suffix }) => (
-    <View style={s.formGroup}>
-      <Text style={s.label}>{label}{suffix ? <Text style={{ color: C.dim }}> ({suffix})</Text> : ''}</Text>
-      <TextInput style={s.input} placeholder={placeholder} placeholderTextColor={C.muted}
-        keyboardType="numeric" value={value} onChangeText={onChangeText} />
-    </View>
-  );
 
   return (
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

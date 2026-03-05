@@ -57,9 +57,9 @@ function HomeTabs() {
           </HomeStack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen name="Contracts" component={MyContractsScreen} options={{ title: '📄 My Contracts' }} />
-      <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ title: '🔔 Notifications' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: '👤 My Profile' }} />
+      <Tab.Screen name="Contracts" component={MyContractsScreen} options={{ title: 'My Contracts' }} />
+      <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notifications' }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'My Profile' }} />
     </Tab.Navigator>
   );
 }
