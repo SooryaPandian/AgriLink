@@ -91,7 +91,7 @@ export default function NegotiationPanel() {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold" style={{ color: "var(--text)" }}>Negotiation � {requirement?.cropName}</h1>
+          <h1 className="text-2xl font-extrabold" style={{ color: "var(--text)" }}>Negotiation {requirement?.cropName}</h1>
           <div className="flex items-center gap-3 mt-1">
             <span className="text-sm" style={{ color: "var(--text-muted)" }}>Round {session.currentRound}</span>
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${si.pill}`}>{si.label}</span>
@@ -178,7 +178,7 @@ export default function NegotiationPanel() {
           </div>
           <div className="flex flex-wrap gap-3">
             <button disabled={acting} onClick={() => buyerAction("accept")} className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 transition-all disabled:opacity-50 shadow-lg shadow-green-900/30">
-              <CheckCircle size={18} /> Accept ?{currentRound?.proposedPrice}/q
+              <CheckCircle size={18} /> Accept ₹{currentRound?.proposedPrice}/q
             </button>
             <button disabled={acting} onClick={() => buyerAction("counter")} className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50">
               Send Counter Offer
