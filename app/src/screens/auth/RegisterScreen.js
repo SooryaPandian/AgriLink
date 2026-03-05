@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert, ScrollView,
@@ -10,6 +10,24 @@ const C = { bg: '#0f172a', card: '#1e293b', border: '#334155', text: '#f1f5f9', 
 
 const STEPS = ['Account', 'Farm Details', 'Bank'];
 
+const InputField = memo(({ label, value, onChangeText, placeholder, keyboardType, secureTextEntry }) => (
+  <View style={s.formGroup}>
+    <Text style={s.label}>{label}</Text>
+
+    <TextInput
+      style={s.input}
+      placeholder={placeholder || ''}
+      placeholderTextColor={C.muted}
+      value={value}
+      onChangeText={onChangeText}
+      keyboardType={keyboardType || 'default'}
+      secureTextEntry={secureTextEntry}
+      autoCapitalize="none"
+    />
+
+  </View>
+));
+
 export default function RegisterScreen({ navigation }) {
   const { register } = useAuth();
   const [step, setStep] = useState(0);
@@ -18,6 +36,68 @@ export default function RegisterScreen({ navigation }) {
   const [account, setAccount] = useState({ name: '', email: '', password: '', phone: '' });
   const [farm, setFarm] = useState({ address: '', district: '', state: '', 'farm.location': '', 'farm.totalLandArea': '', 'farm.soilType': '', 'farm.irrigationAvailable': false, 'farm.cropCapacity': '' });
   const [bank, setBank] = useState({ 'bank.bankName': '', 'bank.accountNumber': '', 'bank.ifscCode': '' });
+
+  // Stable handlers so we don't create new function identities on every render.
+
+  const onChangeAccountName = useCallback((v) => {
+    setAccount(a => ({ ...a, name: v }));
+  }, []);
+
+  const onChangeAccountPhone = useCallback((v) => {
+    setAccount(a => ({ ...a, phone: v }));
+  }, []);
+
+  const onChangeAccountEmail = useCallback((v) => {
+    setAccount(a => ({ ...a, email: v }));
+  }, []);
+
+  const onChangeAccountPassword = useCallback((v) => {
+    setAccount(a => ({ ...a, password: v }));
+  }, []);
+
+  // FARM HANDLERS
+
+  const onChangeFarmAddress = useCallback((v) => {
+    setFarm(f => ({ ...f, address: v }));
+  }, []);
+
+  const onChangeFarmDistrict = useCallback((v) => {
+    setFarm(f => ({ ...f, district: v }));
+  }, []);
+
+  const onChangeFarmState = useCallback((v) => {
+    setFarm(f => ({ ...f, state: v }));
+  }, []);
+
+  const onChangeFarmLocation = useCallback((v) => {
+    setFarm(f => ({ ...f, location: v }));
+  }, []);
+
+  const onChangeFarmLandArea = useCallback((v) => {
+    setFarm(f => ({ ...f, totalLandArea: v }));
+  }, []);
+
+  const onChangeFarmCapacity = useCallback((v) => {
+    setFarm(f => ({ ...f, cropCapacity: v }));
+  }, []);
+
+  const onChangeSoilType = useCallback((v) => {
+    setFarm(f => ({ ...f, soilType: v }));
+  }, []);
+
+  // BANK HANDLERS
+
+  const onChangeBankName = useCallback((v) => {
+    setBank(b => ({ ...b, bankName: v }));
+  }, []);
+
+  const onChangeBankAccount = useCallback((v) => {
+    setBank(b => ({ ...b, accountNumber: v }));
+  }, []);
+
+  const onChangeBankIfsc = useCallback((v) => {
+    setBank(b => ({ ...b, ifscCode: v }));
+  }, []);
 
   const handleAccountStep = async () => {
     if (!account.name || !account.email || !account.password || !account.phone) {
@@ -75,15 +155,6 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
-  const InputField = ({ label, value, onChangeText, placeholder, keyboardType, secureTextEntry }) => (
-    <View style={s.formGroup}>
-      <Text style={s.label}>{label}</Text>
-      <TextInput style={s.input} placeholder={placeholder || ''} placeholderTextColor={C.muted}
-        value={value} onChangeText={onChangeText} keyboardType={keyboardType || 'default'}
-        secureTextEntry={secureTextEntry} autoCapitalize="none" />
-    </View>
-  );
-
   return (
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
@@ -108,16 +179,47 @@ export default function RegisterScreen({ navigation }) {
           ))}
         </View>
 
+  
         <View style={s.card}>
+
           {step === 0 && (
             <>
               <Text style={s.title}>Personal Details</Text>
-              <InputField label="Full Name" value={account.name} onChangeText={v => setAccount(a => ({ ...a, name: v }))} placeholder="Your name" />
-              <InputField label="Phone" value={account.phone} onChangeText={v => setAccount(a => ({ ...a, phone: v }))} placeholder="+91 90000 00000" keyboardType="phone-pad" />
-              <InputField label="Email" value={account.email} onChangeText={v => setAccount(a => ({ ...a, email: v }))} placeholder="farmer@example.com" keyboardType="email-address" />
-              <InputField label="Password" value={account.password} onChangeText={v => setAccount(a => ({ ...a, password: v }))} placeholder="Min 6 characters" secureTextEntry />
-              <TouchableOpacity style={[s.btn, s.btnPrimary]} onPress={handleAccountStep} disabled={loading}>
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.btnText}>Continue →</Text>}
+
+              <InputField
+                label="Full Name"
+                value={account.name}
+                onChangeText={onChangeAccountName}
+              />
+
+              <InputField
+                label="Phone"
+                value={account.phone}
+                onChangeText={onChangeAccountPhone}
+                keyboardType="phone-pad"
+              />
+
+              <InputField
+                label="Email"
+                value={account.email}
+                onChangeText={onChangeAccountEmail}
+              />
+
+              <InputField
+                label="Password"
+                value={account.password}
+                onChangeText={onChangeAccountPassword}
+                secureTextEntry
+              />
+
+              <TouchableOpacity
+                style={[s.btn, s.btnPrimary]}
+                onPress={handleAccountStep}
+              >
+                {loading
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={s.btnText}>Continue →</Text>
+                }
               </TouchableOpacity>
             </>
           )}
@@ -125,27 +227,59 @@ export default function RegisterScreen({ navigation }) {
           {step === 1 && (
             <>
               <Text style={s.title}>Farm Information</Text>
-              <InputField label="Address" value={farm.address} onChangeText={v => setFarm(f => ({ ...f, address: v }))} placeholder="Street address" />
-              <View style={s.row}>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <InputField label="District" value={farm.district} onChangeText={v => setFarm(f => ({ ...f, district: v }))} placeholder="District" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <InputField label="State" value={farm.state} onChangeText={v => setFarm(f => ({ ...f, state: v }))} placeholder="State" />
-                </View>
-              </View>
-              <InputField label="Farm Location" value={farm['farm.location']} onChangeText={v => setFarm(f => ({ ...f, 'farm.location': v }))} placeholder="Village / GPS coords" />
-              <View style={s.row}>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <InputField label="Land Area (acres)" value={farm['farm.totalLandArea']} onChangeText={v => setFarm(f => ({ ...f, 'farm.totalLandArea': v }))} keyboardType="numeric" placeholder="e.g., 5.5" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <InputField label="Capacity (quintals)" value={farm['farm.cropCapacity']} onChangeText={v => setFarm(f => ({ ...f, 'farm.cropCapacity': v }))} keyboardType="numeric" placeholder="e.g., 200" />
-                </View>
-              </View>
-              <InputField label="Soil Type" value={farm['farm.soilType']} onChangeText={v => setFarm(f => ({ ...f, 'farm.soilType': v }))} placeholder="e.g., Red laterite, Black cotton" />
-              <TouchableOpacity style={[s.btn, s.btnPrimary]} onPress={handleFarmStep} disabled={loading}>
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.btnText}>Continue →</Text>}
+
+              <InputField
+                label="Address"
+                value={farm.address}
+                onChangeText={onChangeFarmAddress}
+              />
+
+              <InputField
+                label="District"
+                value={farm.district}
+                onChangeText={onChangeFarmDistrict}
+              />
+
+              <InputField
+                label="State"
+                value={farm.state}
+                onChangeText={onChangeFarmState}
+              />
+
+              <InputField
+                label="Farm Location"
+                value={farm.location}
+                onChangeText={onChangeFarmLocation}
+              />
+
+              <InputField
+                label="Land Area"
+                value={farm.totalLandArea}
+                onChangeText={onChangeFarmLandArea}
+                keyboardType="numeric"
+              />
+
+              <InputField
+                label="Capacity"
+                value={farm.cropCapacity}
+                onChangeText={onChangeFarmCapacity}
+                keyboardType="numeric"
+              />
+
+              <InputField
+                label="Soil Type"
+                value={farm.soilType}
+                onChangeText={onChangeSoilType}
+              />
+
+              <TouchableOpacity
+                style={[s.btn, s.btnPrimary]}
+                onPress={handleFarmStep}
+              >
+                {loading
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={s.btnText}>Continue →</Text>
+                }
               </TouchableOpacity>
             </>
           )}
@@ -153,19 +287,38 @@ export default function RegisterScreen({ navigation }) {
           {step === 2 && (
             <>
               <Text style={s.title}>Bank Details</Text>
-              <InputField label="Bank Name" value={bank['bank.bankName']} onChangeText={v => setBank(b => ({ ...b, 'bank.bankName': v }))} placeholder="e.g., State Bank of India" />
-              <InputField label="Account Number" value={bank['bank.accountNumber']} onChangeText={v => setBank(b => ({ ...b, 'bank.accountNumber': v }))} keyboardType="numeric" placeholder="Account number" />
-              <InputField label="IFSC Code" value={bank['bank.ifscCode']} onChangeText={v => setBank(b => ({ ...b, 'bank.ifscCode': v }))} placeholder="e.g., SBIN0001234" />
-              <TouchableOpacity style={[s.btn, s.btnPrimary]} onPress={handleBankStep} disabled={loading}>
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.btnText}>Complete Registration</Text>}
+
+              <InputField
+                label="Bank Name"
+                value={bank.bankName}
+                onChangeText={onChangeBankName}
+              />
+
+              <InputField
+                label="Account Number"
+                value={bank.accountNumber}
+                onChangeText={onChangeBankAccount}
+                keyboardType="numeric"
+              />
+
+              <InputField
+                label="IFSC Code"
+                value={bank.ifscCode}
+                onChangeText={onChangeBankIfsc}
+              />
+
+              <TouchableOpacity
+                style={[s.btn, s.btnPrimary]}
+                onPress={handleBankStep}
+              >
+                {loading
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={s.btnText}>Complete Registration</Text>
+                }
               </TouchableOpacity>
             </>
           )}
-
-          <TouchableOpacity onPress={() => navigation.navigate('Login')} style={s.linkBtn}>
-            <Text style={s.linkText}>Already have an account? <Text style={{ color: C.primary }}>Sign in</Text></Text>
-          </TouchableOpacity>
-        </View>
+          </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
