@@ -1,0 +1,125 @@
+/* Shared auth page styles */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-bg {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 20%, rgba(22, 163, 74, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.auth-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+    box-shadow: var(--shadow);
+}
+
+.auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    font-size: 1.5rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pass-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(4px);
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.pass-toggle:hover {
+    color: var(--text);
+}
+
+/* Step indicator for multi-step register */
+.steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 28px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 2px solid var(--border);
+    color: var(--text-dim);
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.step.active .step-num {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(22, 163, 74, 0.1);
+}
+
+.step.done .step-num {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+}
+
+.step-label {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+.step.active .step-label {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.step-line {
+    width: 32px;
+    height: 2px;
+    background: var(--border);
+    flex-shrink: 0;
+}
+
+.step-line.done {
+    background: var(--primary);
+}
