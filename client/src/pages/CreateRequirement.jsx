@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { Save, ArrowLeft } from "lucide-react";
@@ -23,11 +23,16 @@ const Section = ({ title, children }) => (
 
 export default function CreateRequirement() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefill  = location.state?.prefill ?? {};
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    cropName: "", variety: "", requiredQuantity: "", qualityGrade: "A",
+    cropName: prefill.cropName ?? "",
+    variety:  prefill.variety  ?? "",
+    requiredQuantity: "", qualityGrade: "A",
     plantingDate: "", harvestDate: "", deliveryDate: "",
-    targetRegion: "", allowedDistricts: "",
+    targetRegion:     prefill.targetRegion     ?? "",
+    allowedDistricts: prefill.allowedDistricts ?? "",
     minFarmSize: "", requiredCertifications: "", farmingPractices: "",
     initialPriceExpectation: "", negotiationAllowed: true,
     pickupOrDelivery: "pickup", transportResponsibility: "buyer",

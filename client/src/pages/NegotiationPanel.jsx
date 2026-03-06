@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import { getSocket } from "../services/socket";
 import toast from "react-hot-toast";
-import { ArrowLeft, CheckCircle, MessageSquare, RefreshCw } from "lucide-react";
+import { ArrowLeft, CheckCircle, MessageSquare, RefreshCw, Truck } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 
 export default function NegotiationPanel() {
@@ -14,6 +14,9 @@ export default function NegotiationPanel() {
   const [counterPrice, setCounterPrice] = useState("");
   const [note, setNote] = useState("");
   const [acting, setActing] = useState(false);
+  const [logState, setLogState] = useState("");
+  const [logResult, setLogResult] = useState(null);
+  const [logLoading, setLogLoading] = useState(false);
 
   const fetchData = useCallback(() => {
     Promise.all([
@@ -78,6 +81,26 @@ export default function NegotiationPanel() {
   };
   const si = statusInfo[session.status] || statusInfo.open;
 
+  const estimateLogistics = async () => {
+    if (!logState) { toast.error("Select a farmer state"); return; }
+    setLogLoading(true);
+    try {
+      const qty = requirement?.requiredQuantity || 1;
+      const { data } = await api.get(`/buyers/logistics-estimate?farmerState=${encodeURIComponent(logState)}&quantity=${qty}`);
+      setLogResult(data);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not estimate — set your company state in Profile first");
+    } finally { setLogLoading(false); }
+  };
+
+  const STATES = [
+    "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat",
+    "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh",
+    "Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab",
+    "Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh",
+    "Uttarakhand","West Bengal","Delhi","Puducherry","Jammu and Kashmir","Ladakh",
+  ];
+
   const inputCls = "w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-green-500/40";
   const inputStyle = { background: "var(--bg)", borderColor: "var(--border)", color: "var(--text)" };
 
@@ -134,7 +157,7 @@ export default function NegotiationPanel() {
 
         {/* Farmer responses */}
         <div className="rounded-2xl border p-6" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-          <h3 className="font-bold mb-4" style={{ color: "var(--text)" }}>Round {session.currentRound} � Farmer Responses</h3>
+          <h3 className="font-bold mb-4" style={{ color: "var(--text)" }}>Round {session.currentRound} &mdash; Farmer Responses</h3>
           {!currentRound?.farmerResponses?.length ? (
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>No farmer responses yet.</p>
           ) : (
@@ -177,10 +200,10 @@ export default function NegotiationPanel() {
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button disabled={acting} onClick={() => buyerAction("accept")} className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 transition-all disabled:opacity-50 shadow-lg shadow-green-900/30">
+            <button disabled={acting} onClick={() => buyerAction("accept")} className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white bg-linear-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 transition-all disabled:opacity-50 shadow-lg shadow-green-900/30">
               <CheckCircle size={18} /> Accept ₹{currentRound?.proposedPrice}/q
             </button>
-            <button disabled={acting} onClick={() => buyerAction("counter")} className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50">
+            <button disabled={acting} onClick={() => buyerAction("counter")} className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50">
               Send Counter Offer
             </button>
             <Link to={`/chat/${session._id}`} className="inline-flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-all hover:border-green-500/50" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
@@ -195,17 +218,64 @@ export default function NegotiationPanel() {
           <CheckCircle size={48} className="text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-extrabold mb-2" style={{ color: "var(--text)" }}>Price Agreed at ₹{session.finalAgreedPrice}/quintal</h2>
           <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>Contracts have been allocated to qualifying farmers. Check the Contracts page.</p>
-          <Link to="/contracts" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 transition-all shadow-lg shadow-green-900/30">
+          <Link to="/contracts" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-linear-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 transition-all shadow-lg shadow-green-900/30">
             View Contracts
           </Link>
         </div>
       )}
 
+      {/* Logistics Estimate */}
+      <div className="rounded-2xl border mt-5 p-6" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-2 mb-4">
+          <Truck size={18} className="text-sky-500" />
+          <h3 className="font-bold" style={{ color: "var(--text)" }}>Logistics Estimate</h3>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 font-semibold">Rough</span>
+        </div>
+        <p className="text-sm mb-4" style={{ color: "var(--text-dim)" }}>
+          Estimate road freight cost from a farmer's state to your location for {requirement?.requiredQuantity || "–"} quintals.
+        </p>
+        <div className="flex items-end gap-3 flex-wrap">
+          <div className="flex-1 min-w-45">
+            <label className="text-xs font-semibold uppercase tracking-widest block mb-1.5" style={{ color: "var(--text-muted)" }}>Farmer State</label>
+            <select className={inputCls} style={{ ...inputStyle, cursor: "pointer" }} value={logState} onChange={(e) => { setLogState(e.target.value); setLogResult(null); }}>
+              <option value="">Select state...</option>
+              {STATES.map((s) => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <button
+            onClick={estimateLogistics}
+            disabled={logLoading || !logState}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white bg-linear-to-r from-sky-600 to-sky-500 hover:from-sky-700 hover:to-sky-600 transition-all disabled:opacity-50 shrink-0"
+          >
+            {logLoading ? <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <Truck size={15} />}
+            Estimate
+          </button>
+        </div>
+        {logResult && (
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Distance",         value: `~${logResult.distKm} km`,              color: "text-sky-400" },
+              { label: "Distance Tier",    value: logResult.tier,                          color: "text-indigo-400" },
+              { label: "Rate / Quintal",   value: `\u20b9${logResult.ratePerQuintal}`,     color: "text-amber-400" },
+              { label: "Total Estimate",   value: `\u20b9${logResult.estimatedTotal}`,     color: "text-green-400" },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="rounded-xl border px-4 py-3 text-center" style={{ background: "var(--bg)", borderColor: "var(--border)" }}>
+                <div className={`text-lg font-bold ${color}`}>{value}</div>
+                <div className="text-xs mt-0.5 font-semibold uppercase tracking-wider" style={{ color: "var(--text-dim)" }}>{label}</div>
+              </div>
+            ))}
+            <p className="col-span-full text-xs" style={{ color: "var(--text-dim)" }}>{logResult.note}</p>
+          </div>
+        )}
+      </div>
+
       {session.status === "farmer_review" && (
-        <div className="rounded-2xl border-2 border-blue-500/30 bg-blue-500/5 p-10 text-center">
-          <div className="text-4xl mb-3">?</div>
+        <div className="rounded-2xl border-2 border-blue-500/30 bg-blue-500/5 p-10 text-center mt-5">
+          <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
+            <RefreshCw size={22} className="text-blue-400" />
+          </div>
           <h3 className="text-lg font-bold mb-2" style={{ color: "var(--text)" }}>Waiting for farmers to respond</h3>
-          <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>Counter offer of ?{currentRound?.buyerCounterPrice}/q has been sent. Check back soon or refresh.</p>
+          <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>Counter offer of &#x20b9;{currentRound?.buyerCounterPrice}/q has been sent. Check back soon or refresh.</p>
           <Link to={`/chat/${session._id}`} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all hover:border-blue-500/50" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
             <MessageSquare size={16} /> Open Chat
           </Link>
