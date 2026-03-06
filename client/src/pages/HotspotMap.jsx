@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import {
   MapContainer,
   TileLayer,
-  CircleMarker,
+  Circle,
   Tooltip,
   useMap,
 } from "react-leaflet";
@@ -153,28 +153,39 @@ export default function HotspotMap() {
   //  Load crop catalogue on mount
   // ─────────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    (async () => {
+            {hotspots.map((h) => {
       try {
         const { data } = await api.get(`/buyers/hotspots/crops?year=${YEAR}`);
         if (data.success) setCatalogue(data.crops);
-        console.log("Loaded crop catalogue:", data.crops, YEAR);
-      } catch {
+              // Compute a radius in meters so the circle represents real area and stays fixed relative to map zoom
+              const color    = yieldColor(h.avgYieldPerAcre, yieldMin, yieldMax);
+              let radiusMeters = 500; // default
+              if (h.farmSpreadKm && h.farmSpreadKm > 0) {
+                // farmSpreadKm is the diagonal approx; use half as radius (meters)
+                radiusMeters = Math.max(300, (h.farmSpreadKm * 1000) / 2);
+              } else if (h.totalAcres && h.totalAcres > 0) {
+                // fallback: convert acres -> approximate circle radius
+                const areaM2 = h.totalAcres * 4046.86;
+                radiusMeters = Math.max(300, Math.sqrt(areaM2 / Math.PI));
+              }
+              const satisfies = !!h.satisfies;
         toast.error("Could not load crop list. Make sure the server is running.");
-      } finally {
-        setCatLoading(false);
-      }
-    })();
-  }, []);
-
-  // ─────────────────────────────────────────────────────────────────────────
-  //  Fetch buyer profile to get HQ lat/lng (best-effort)
-  // ─────────────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/buyers/profile");
-        const p = data.profile;
-        setCompanyName(p?.companyName || "");
+                <Circle
+                  key={key}
+                  center={[h.lat, h.lng]}
+                  radius={radiusMeters}
+                  pathOptions={{
+                    color:       isActive ? "#ffffff" : (satisfies ? "#16a34a" : color),
+                    fillColor:   color,
+                    // reduce transparency = increase opacity
+                    fillOpacity: isActive ? 0.98 : (satisfies ? 0.92 : 0.9),
+                    weight:      isActive ? 3 : (satisfies ? 3 : 2),
+                  }}
+                  eventHandlers={{
+                    click: () => handleSelectHotspot(h),
+                  }}
+                >
+                  <Tooltip direction="top" opacity={0.95}>
         // Profile stores city/state as text; use fixed coords per known cities
         const CITY_COORDS = {
           coimbatore: { lat: 11.0168, lng: 76.9558 },
@@ -183,16 +194,17 @@ export default function HotspotMap() {
           salem:      { lat: 11.6643, lng: 78.1460 },
           tirupur:    { lat: 11.1085, lng: 77.3411 },
           chennai:    { lat: 13.0827, lng: 80.2707 },
-          madurai:    { lat: 9.9252,  lng: 78.1198 },
-        };
-        const cityKey = p?.city?.toLowerCase() ?? "";
-        const match   = Object.keys(CITY_COORDS).find((k) => cityKey.includes(k));
+                      <div style={{ marginTop: 6, fontSize: 12 }}>
+                        <strong>Total:</strong> {h.totalQuintals?.toFixed(1) ?? '—'} q
+                        &nbsp;·&nbsp;<strong>Spread:</strong> {h.farmSpreadKm?.toFixed(1) ?? '—'} km
+                        &nbsp;·&nbsp;<strong>Radius:</strong> {Math.round(radiusMeters)} m
+                      </div>
         if (match) {
           setHq({
             lat:   CITY_COORDS[match].lat,
             lng:   CITY_COORDS[match].lng,
             label: p.city,
-          });
+                </Circle>
         }
       } catch {
         // silently fall back to DEFAULT_HQ
