@@ -40,8 +40,9 @@ router.put('/profile', async (req, res) => {
 // GET /api/farmers/requirements - Browse open requirements
 router.get('/requirements', async (req, res) => {
   try {
-    const { district, crop, page = 1, limit = 20 } = req.query;
-    const filter = { status: 'open' };
+  const { district, crop, page = 1, limit = 20 } = req.query;
+  // show requirements that are either open or currently in negotiation
+  const filter = { status: 'open' };
     if (district) filter.allowedDistricts = { $in: [district] };
     if (crop) filter.cropName = { $regex: crop, $options: 'i' };
 
@@ -51,7 +52,30 @@ router.get('/requirements', async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
+    console.log('Fetched requirements', requirements.length);
+    const total = await CropRequirement.countDocuments(filter);
+    res.json({ success: true, requirements, total, page: parseInt(page), pages: Math.ceil(total / limit) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
+// GET /api/farmers/requirements/negotiating - Browse negotiating requirements
+router.get('/requirements/negotiating', async (req, res) => {
+  try {
+    const { district, crop, page = 1, limit = 20 } = req.query;
+    // show requirements that are currently in negotiation
+    const filter = { status: 'negotiating' };
+    if (district) filter.allowedDistricts = { $in: [district] };
+    if (crop) filter.cropName = { $regex: crop, $options: 'i' };
+
+    const requirements = await CropRequirement.find(filter)
+      .populate('buyer', 'name email')
+      .populate('buyerProfile', 'companyName industryType')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+    console.log('Fetched requirements', requirements.length);
     const total = await CropRequirement.countDocuments(filter);
     res.json({ success: true, requirements, total, page: parseInt(page), pages: Math.ceil(total / limit) });
   } catch (err) {

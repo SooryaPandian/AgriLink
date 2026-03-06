@@ -33,18 +33,19 @@ export default function RequirementDetailScreen({ route, navigation }) {
         <InfoBlock label="Required" value={`${requirement.requiredQuantity} q`} />
         <InfoBlock label="Grade" value={requirement.qualityGrade} />
         <InfoBlock label="Price/q" value={requirement.initialPriceExpectation ? `₹${requirement.initialPriceExpectation}` : 'Negotiate'} color={C.accent} />
+        <InfoBlock label="Status" value={requirement.status === 'open' ? 'Open' : requirement.status === 'negotiating' ? 'Negotiation' : requirement.status === 'closed' ? 'Closed' : requirement.status} color={requirement.status === 'open' ? C.success : requirement.status === 'negotiating' ? C.info : C.dim} />
       </View>
 
       {/* Details */}
       <View style={s.section}>
         <Text style={s.sectionTitle}>📋 Requirement Details</Text>
         <View style={s.detailGrid}>
-          <InfoBlock label="Region" value={requirement.targetRegion} />
-          <InfoBlock label="Districts" value={requirement.allowedDistricts?.join(', ')} />
-          <InfoBlock label="Negotiable" value={requirement.negotiationAllowed ? '✅ Yes' : '❌ No'} />
-          <InfoBlock label="Transport" value={requirement.transportResponsibility} />
-          <InfoBlock label="Logistics" value={requirement.pickupOrDelivery} />
-          <InfoBlock label="Min Farm" value={requirement.minFarmSize ? `${requirement.minFarmSize} acres` : 'Any'} />
+          <View style={s.twoCol}><InfoBlock label="Region" value={requirement.targetRegion} /></View>
+          <View style={s.twoCol}><InfoBlock label="Districts" value={requirement.allowedDistricts?.join(', ')} /></View>
+          <View style={s.twoCol}><InfoBlock label="Negotiable" value={requirement.negotiationAllowed ? '✅ Yes' : '❌ No'} /></View>
+          <View style={s.twoCol}><InfoBlock label="Transport" value={requirement.transportResponsibility} /></View>
+          <View style={s.twoCol}><InfoBlock label="Logistics" value={requirement.pickupOrDelivery} /></View>
+          <View style={s.twoCol}><InfoBlock label="Min Farm" value={requirement.minFarmSize ? `${requirement.minFarmSize} acres` : 'Any'} /></View>
         </View>
       </View>
 
@@ -96,13 +97,14 @@ const s = StyleSheet.create({
   variety: { fontSize: 14, color: C.muted, marginTop: 4 },
   buyerBadge: { marginTop: 12, backgroundColor: 'rgba(22,163,74,0.1)', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start' },
   buyerText: { fontSize: 12, color: C.primary, fontWeight: '600' },
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  infoBlock: { flex: 1, backgroundColor: C.card, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: C.border },
+  statsRow: { width: '100%', flexDirection: 'row', marginBottom: 16, justifyContent: 'space-between' },
+  infoBlock: { backgroundColor: C.card, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: C.border },
   infoLabel: { fontSize: 9, color: C.dim, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
   infoVal: { fontSize: 14, fontWeight: '700', color: C.text },
   section: { backgroundColor: C.card, borderRadius: 14, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: C.border },
   sectionTitle: { fontSize: 14, fontWeight: '700', color: C.primary, marginBottom: 12 },
-  detailGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  detailGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  twoCol: { width: '48%', marginBottom: 8 },
   timelineRow: { flexDirection: 'row', gap: 8 },
   timeItem: { flex: 1, backgroundColor: C.bg, borderRadius: 8, padding: 10, borderWidth: 1, borderColor: C.border },
   timeLabel: { fontSize: 9, color: C.dim, textTransform: 'uppercase' },

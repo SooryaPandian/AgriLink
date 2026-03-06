@@ -19,15 +19,17 @@ import ChatScreen from './src/screens/farmer/ChatScreen';
 import MyContractsScreen from './src/screens/farmer/MyContractsScreen';
 import NotificationsScreen from './src/screens/farmer/NotificationsScreen';
 import ProfileScreen from './src/screens/farmer/ProfileScreen';
+import NegotiationsListScreen from './src/screens/farmer/NegotiationsListScreen';
 
 const AuthStack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
 const ContractStack = createStackNavigator();
+const NegotiationsStack = createStackNavigator();
 
 const COLORS = { primary: '#16a34a', bg: '#0f172a', card: '#1e293b', text: '#f1f5f9', muted: '#94a3b8' };
 
-const tabIcon = { Home: '🌾', Contracts: '📄', Notifications: '🔔', Profile: '👤' };
+const tabIcon = { Home: '🌾', Contracts: '📄', Negotiations: '🤝', Notifications: '🔔', Profile: '👤' };
 
 function HomeTabs() {
   return (
@@ -55,6 +57,20 @@ function HomeTabs() {
             <HomeStack.Screen name="Negotiation" component={NegotiationScreen} options={{ title: 'Negotiation' }} />
             <HomeStack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
           </HomeStack.Navigator>
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="Negotiations" options={{ title: 'My Negotiations', headerShown: false }}>
+        {() => (
+          <NegotiationsStack.Navigator screenOptions={{
+            headerStyle: { backgroundColor: COLORS.card },
+            headerTintColor: COLORS.text,
+            headerTitleStyle: { fontWeight: '700' },
+          }}>
+            <NegotiationsStack.Screen name="NegotiationsList" component={NegotiationsListScreen} options={{ title: 'My Negotiations' }} />
+            <NegotiationsStack.Screen name="RequirementDetail" component={RequirementDetailScreen} options={{ title: 'Requirement Details' }} />
+            <NegotiationsStack.Screen name="Negotiation" component={NegotiationScreen} options={{ title: 'Negotiation' }} />
+            <NegotiationsStack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
+          </NegotiationsStack.Navigator>
         )}
       </Tab.Screen>
       <Tab.Screen name="Contracts" component={MyContractsScreen} options={{ title: 'My Contracts' }} />
