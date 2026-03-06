@@ -15,6 +15,7 @@ import Contracts from './pages/Contracts';
 import ChatPage from './pages/ChatPage';
 import Notifications from './pages/Notifications';
 import EditProfile from './pages/EditProfile';
+import HotspotMap from './pages/HotspotMap';
 import './index.css';
 
 function Spinner() {
@@ -74,6 +75,7 @@ export default function App() {
                             <Route path="chat/:sessionId" element={<ChatPage />} />
                             <Route path="notifications" element={<Notifications />} />
                             <Route path="profile" element={<EditProfile />} />
+                            <Route path="hotspot-map" element={<HotspotMap />} />
                         </Route>
                         <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>

@@ -4,13 +4,14 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { getSocket } from "../services/socket";
 import {
-  LayoutDashboard, Sprout, FileText, Bell, LogOut, ChevronRight, ChevronLeft, Sun, Moon, UserCircle,
+  LayoutDashboard, Sprout, FileText, Bell, LogOut, ChevronRight, ChevronLeft, Sun, Moon, UserCircle, MapPin,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
 const NAV = [
   { to: "/dashboard",    icon: LayoutDashboard, label: "Dashboard" },
   { to: "/requirements", icon: Sprout,          label: "Requirements" },
+  { to: "/hotspot-map",  icon: MapPin,          label: "Hotspot Map" },
   { to: "/contracts",    icon: FileText,         label: "Contracts" },
   { to: "/notifications",icon: Bell,             label: "Notifications" },
   { to: "/profile",      icon: UserCircle,       label: "Company Profile" },
