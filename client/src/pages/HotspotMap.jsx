@@ -153,61 +153,15 @@ export default function HotspotMap() {
   //  Load crop catalogue on mount
   // ─────────────────────────────────────────────────────────────────────────
   useEffect(() => {
-            {hotspots.map((h) => {
+    (async () => {
       try {
         const { data } = await api.get(`/buyers/hotspots/crops?year=${YEAR}`);
         if (data.success) setCatalogue(data.crops);
-              // Compute a radius in meters so the circle represents real area and stays fixed relative to map zoom
-              const color    = yieldColor(h.avgYieldPerAcre, yieldMin, yieldMax);
-              let radiusMeters = 500; // default
-              if (h.farmSpreadKm && h.farmSpreadKm > 0) {
-                // farmSpreadKm is the diagonal approx; use half as radius (meters)
-                radiusMeters = Math.max(300, (h.farmSpreadKm * 1000) / 2);
-              } else if (h.totalAcres && h.totalAcres > 0) {
-                // fallback: convert acres -> approximate circle radius
-                const areaM2 = h.totalAcres * 4046.86;
-                radiusMeters = Math.max(300, Math.sqrt(areaM2 / Math.PI));
-              }
-              const satisfies = !!h.satisfies;
-        toast.error("Could not load crop list. Make sure the server is running.");
-                <Circle
-                  key={key}
-                  center={[h.lat, h.lng]}
-                  radius={radiusMeters}
-                  pathOptions={{
-                    color:       isActive ? "#ffffff" : (satisfies ? "#16a34a" : color),
-                    fillColor:   color,
-                    // reduce transparency = increase opacity
-                    fillOpacity: isActive ? 0.98 : (satisfies ? 0.92 : 0.9),
-                    weight:      isActive ? 3 : (satisfies ? 3 : 2),
-                  }}
-                  eventHandlers={{
-                    click: () => handleSelectHotspot(h),
-                  }}
-                >
-                  <Tooltip direction="top" opacity={0.95}>
-        // Profile stores city/state as text; use fixed coords per known cities
-        const CITY_COORDS = {
-          coimbatore: { lat: 11.0168, lng: 76.9558 },
-          erode:      { lat: 11.3410, lng: 77.7172 },
-          karur:      { lat: 10.9601, lng: 78.0766 },
-          salem:      { lat: 11.6643, lng: 78.1460 },
-          tirupur:    { lat: 11.1085, lng: 77.3411 },
-          chennai:    { lat: 13.0827, lng: 80.2707 },
-                      <div style={{ marginTop: 6, fontSize: 12 }}>
-                        <strong>Total:</strong> {h.totalQuintals?.toFixed(1) ?? '—'} q
-                        &nbsp;·&nbsp;<strong>Spread:</strong> {h.farmSpreadKm?.toFixed(1) ?? '—'} km
-                        &nbsp;·&nbsp;<strong>Radius:</strong> {Math.round(radiusMeters)} m
-                      </div>
-        if (match) {
-          setHq({
-            lat:   CITY_COORDS[match].lat,
-            lng:   CITY_COORDS[match].lng,
-            label: p.city,
-                </Circle>
-        }
+        console.log("Loaded crop catalogue:", data.crops, YEAR);
       } catch {
-        // silently fall back to DEFAULT_HQ
+        toast.error("Could not load crop list. Make sure the server is running.");
+      } finally {
+        setCatLoading(false);
       }
     })();
   }, []);
@@ -577,28 +531,37 @@ export default function HotspotMap() {
 
             {/* Hotspot markers */}
             {hotspots.map((h) => {
-              const key      = `${h.village}-${h.district}`;
+              const key = `${h.village}-${h.district}`;
               const isActive = selected && selected.village === h.village && selected.district === h.district;
-              // Increase visual prominence: scale sqrt(totalAcres) with a larger multiplier
-              const radius   = Math.max(10, Math.min(80, Math.sqrt(Math.max(1, h.totalAcres)) * 4));
-              const color    = yieldColor(h.avgYieldPerAcre, yieldMin, yieldMax);
+              const color = yieldColor(h.avgYieldPerAcre, yieldMin, yieldMax);
+
+              // Compute a radius in meters so the circle represents real area and stays fixed relative to map zoom
+              let radiusMeters = 500; // default
+              if (h.farmSpreadKm && h.farmSpreadKm > 0) {
+                // farmSpreadKm is the diagonal approx; use half as radius (meters)
+                radiusMeters = Math.max(300, (h.farmSpreadKm * 1000) / 2);
+              } else if (h.totalAcres && h.totalAcres > 0) {
+                // fallback: convert acres -> approximate circle radius
+                const areaM2 = h.totalAcres * 4046.86;
+                radiusMeters = Math.max(300, Math.sqrt(areaM2 / Math.PI));
+              }
               const satisfies = !!h.satisfies;
+
               return (
-                <CircleMarker
+                <Circle
                   key={key}
                   center={[h.lat, h.lng]}
-                  radius={radius}
+                  radius={radiusMeters}
                   pathOptions={{
-                    color:       isActive ? "#ffffff" : (satisfies ? "#16a34a" : color),
-                    fillColor:   color,
-                    fillOpacity: isActive ? 0.95 : (satisfies ? 0.95 : 0.75),
-                    weight:      isActive ? 3 : (satisfies ? 3 : 2),
+                    color: isActive ? "#ffffff" : (satisfies ? "#16a34a" : color),
+                    fillColor: color,
+                    // reduce transparency = increase opacity
+                    fillOpacity: isActive ? 0.98 : (satisfies ? 0.92 : 0.9),
+                    weight: isActive ? 3 : (satisfies ? 3 : 2),
                   }}
-                  eventHandlers={{
-                    click: () => handleSelectHotspot(h),
-                  }}
+                  eventHandlers={{ click: () => handleSelectHotspot(h) }}
                 >
-                  <Tooltip direction="top" offset={[0, -radius]} opacity={0.95}>
+                  <Tooltip direction="top" opacity={0.95}>
                     <div style={{ minWidth: 150 }}>
                       <div style={{ fontWeight: 700 }}>{h.village}</div>
                       <div style={{ color: "#666", fontSize: 11 }}>{h.taluk} · {h.district}</div>
@@ -610,13 +573,14 @@ export default function HotspotMap() {
                       <div style={{ marginTop: 6, fontSize: 12 }}>
                         <strong>Total:</strong> {h.totalQuintals?.toFixed(1) ?? '—'} q
                         &nbsp;·&nbsp;<strong>Spread:</strong> {h.farmSpreadKm?.toFixed(1) ?? '—'} km
+                        &nbsp;·&nbsp;<strong>Radius:</strong> {Math.round(radiusMeters)} m
                       </div>
                       <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>
                         {h.distanceKm.toFixed(0)} km from HQ
                       </div>
                     </div>
                   </Tooltip>
-                </CircleMarker>
+                </Circle>
               );
             })}
           </MapContainer>
